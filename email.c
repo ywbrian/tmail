@@ -7,7 +7,7 @@
 
 bool login_to_gmail(const char *email, const char *password) {
     CURL *curl;
-    CURLcode res = CURL_OK;
+    CURLcode res = CURLE_OK;
 
     curl = curl_easy_init();
     if (curl) {

@@ -1,6 +1,7 @@
 #include "commands.h"
 #include "utils.h"
 #include "version.h"
+#include "constants.h"
 
 #include <ctype.h>
 #include <regex.h>
@@ -9,8 +10,18 @@
 #include <string.h>
 #include <unistd.h>
 
-#define MAX_EMAIL_ADDRESS_LENGTH 254
-
+/**
+ * Parse and handle any global flags in command line arguments
+ *
+ * Parameters:
+ *  argc - the argument count
+ *  argv - the argument strings
+ *
+ * Return:
+ *  0 if program should exit with success after parsing flag
+ *  1 if program should exit with failure after parsing flag
+ *  -1 if no global flags provided or program should continue
+ */
 int parse_global_flags(int argc, const char **argv) {
 	if (argc == 2) {
 		if (strcmp(argv[1], "--help") == 0) {
@@ -20,6 +31,7 @@ int parse_global_flags(int argc, const char **argv) {
 		}
 		return 0;
 	}
+
 	return -1;
 }
 
@@ -35,7 +47,10 @@ bool execute_cmd(const char *cmd_name, int argc, const char **argv) {
 }
 
 bool cmd_login(int argc, const char **argv) {
-	char email[MAX_EMAIL_ADDRESS_LENGTH + 1]; // +1 for null terminator
+    UNUSED(argc);
+    UNUSED(argv);
+
+	char email[MAX_EMAIL_ADDRESS_LENGTH]; // +1 for null terminator
 	printf("Enter email address: ");
 	if (fgets(email, sizeof(email), stdin) == NULL) {
 		fprintf(stderr, "Invalid email address");
@@ -67,13 +82,13 @@ const command_t commands[] = {{"login", cmd_login}};
 
 const int n_commands = sizeof(commands) / sizeof(command_t);
 
-/*
+/**
  * Helper function to verify syntax of a given email address
  *
- * email: the string email address to validate
+ * Parameters:
+ *  email - the string email address to validate
  *
  * Return: true if the email is valid, false otherwise
- *
  */
 bool validate_email(const char *email) {
 	if (!email || email[0] == '\0') {
