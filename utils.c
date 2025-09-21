@@ -110,6 +110,7 @@ bool encrypt_data(const char* data, const char* key, char *output,
 
     if (EVP_EncryptFinal_ex(ctx, encrypted + len, &len) != 1) {
         EVP_CIPHER_CTX_free(ctx);
+        return false;
     }
     total_len += len;
 
@@ -142,7 +143,7 @@ bool decrypt_data(const char *data, const char *key, char *output,
 
     // Extract IV from first part of data (32 hex chars = 16 bytes)
     unsigned char iv[AES_IV_SIZE];
-    for (int i = 0; i < AES_KEY_SIZE; i++) {
+    for (int i = 0; i < AES_IV_SIZE; i++) {
         sscanf(data + (i * 2), "%2hhx", &iv[i]);
     }
 
