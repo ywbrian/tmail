@@ -1,15 +1,10 @@
 CC = gcc
 CFLAGS = -std=gnu99 -Wall -pedantic -Wextra
 
-INCLUDEDIR = /opt/homebrew/opt/openssl/include
-CFLAGS += -I$(INCLUDEDIR)
-
-LIBDIR = /opt/homebrew/opt/openssl/lib
-LDFLAGS = -L$(LIBDIR)
-
 LIBS = -lcurl -lssl -lcrypto
 
-SRC = tmail.c
+SRC = tmail.c commands.c utils.c session.c email.c
+OBJ = $(SRC:.c=.o)
 OUT = tmail
 
 TARGET = all
@@ -18,11 +13,14 @@ TARGET = all
 
 all: $(OUT)
 
-$(OUT): $(SRC)
-	$(CC) $(CFLAGS) $(SRC) -o $(OUT) $(LDFLAGS) $(LIBS)
+$(OUT): $(OBJ)
+	$(CC) $(OBJ) -o $(OUT) $(LIBS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 debug: CFLAGS += -g
 debug: clean all
 
 clean:
-	rm -f $(OUT)
+	rm -f $(OUT) $(OBJ)
