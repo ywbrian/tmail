@@ -1,4 +1,5 @@
 #include "session.h"
+#include "constants.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,13 +10,14 @@
 #include <stdbool.h>
 
 /* Session constants */
-#define SESSION_TOKEN_LENGTH 65             // 64 chars + null terminator
 #define SESSION_FILE_PATH ".tmail/session"  // File path to store session info
+#define SESSION_TOKEN_BYTE_SIZE 32          // Size of session token in bytes
+#define SESSION_TOKEN_LENGTH 64             // Length of hex-encoded token
 #define SESSION_TIMEOUT_SECONDS 3600        // 1 hour
-#define DEFAULT_FILE_PERMISSIONS            // mkdir for .tmail
+#define DEFAULT_FILE_PERMISSIONS 0600       // mkdir for .tmail
 
 
-static char session_file_path[512];
+static char session_file_path[MAX_PATH_LENGTH];
 
 /**
  * Helper function to retrieve full path to ~/.tmail/session
@@ -38,12 +40,12 @@ static void get_session_file_path(void) {
     }
 
     snprintf(session_file_path, sizeof(session_file_path),
-            "%s/.tmail/session", home);
+            "%s/%s", home, SESSION_FILE_PATH);
 
     // Ensure directory exists
-    char dir_path[512];
+    char dir_path[MAX_PATH_LENGTH];
     snprintf(dir_path, sizeof(dir_path), "%s/.tmail", home);
-    mkdir(dir_path, 0700); // Ignore error if already exists
+    mkdir(dir_path, DEFAULT_FILE_PERMISSIONS); // Ignore error if already exists
 }
 
 /**
@@ -57,13 +59,13 @@ static void get_session_file_path(void) {
  *  true if the token was successfully generated, false otherwise
  */
 bool generate_session_token(char *token_str, size_t len) {
-    if (len < SESSION_TOKEN_LENGTH) { return false; }
+    if (len < SESSION_TOKEN_BUFFER_SIZE) { return false; }
 
-    unsigned char buf[32];
+    unsigned char buf[SESSION_TOKEN_BYTE_SIZE];
     if (RAND_bytes(buf, sizeof(buf)) != 1) { return false; }
 
     size_t offset = 0;
-    for (int i = 0; i < 32; i++) {
+    for (int i = 0; i < SESSION_TOKEN_BYTE_SIZE; i++) {
         int written = 
             snprintf(token_str + offset, len - offset, "%02x", buf[i]);
 
@@ -72,7 +74,7 @@ bool generate_session_token(char *token_str, size_t len) {
 
         offset += written;
     }
-    token_str[64] = '\0';
+    token_str[64] = '\0'; // Append null terminator
     return true;
 }
 
