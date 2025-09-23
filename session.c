@@ -1,14 +1,75 @@
 #include "session.h"
 #include "constants.h"
-#include "utils.h"
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <openssl/rand.h>
+#include <pwd.h>
+#include <stdbool.h>
 
-#define CONFIG_FILE ".tmail_config"
+static char session_file_path[512];
+
+/**
+ * Helper function to retrieve full path to ~/.tmail/session
+ *
+ * Parameters:
+ *  None
+ *
+ * Return:
+ *  None
+ */
+static void get_session_file_path(void) {
+    // Return if path already retrieved
+    if (session_file_path[0] != '\0') { return; }
+
+    const char *home = getenv("HOME");
+    if (!home) {
+        struct passwd *pw = getpwuid(getuid());
+        if (!pw) { exit(1); }
+        home = pw->pw_dir;
+    }
+
+    snprintf(session_file_path, sizeof(session_file_path),
+            "%s/.tmail/session", home);
+
+    // Ensure directory exists
+    char dir_path[512];
+    snprintf(dir_path, sizeof(dir_path), "%s/.tmail", home);
+    mkdir(dir_path, 0700); // Ignore error if already exists
+}
+
+/**
+ * Generate random token as hex string
+ *
+ * Parameters:
+ *  token_str - The string buffer to store the token
+ *  len - The size of the token buffer
+ *
+ * Return:
+ *  true if the token was successfully generated, false otherwise
+ */
+bool generate_session_token(char *token_str, size_t len) {
+    if (len < SESSION_TOKEN_LENGTH) { return false; }
+
+    unsigned char buf[32];
+    if (RAND_bytes(buf, sizeof(buf)) != 1) { return false; }
+
+    size_t offset = 0;
+    for (int i = 0; i < 32; i++) {
+        int written = 
+            snprintf(token_str + offset, len - offset, "%02x", buf[i]);
+
+        // Encoding failed or buffer too small
+        if (written < 0 || written >= (int)(len - offset)) { return false; }
+
+        offset += written;
+    }
+    token_str[64] = '\0';
+    return true;
+}
+
 
 /**
  * Check if there is currently a valid session
@@ -20,24 +81,7 @@
  *  true if the session is valid, false otherwise
  */
 bool is_session_valid(void) {
-    const char *home = getenv("HOME");
-    if (!home) { return false; }
-
-    char config_path[CONFIG_PATH_BUFFER_SIZE];
-    snprintf(config_path, sizeof(config_path), "%s/%s", home, CONFIG_FILE);
-
-    // Read from config file
-    FILE *f = fopen(config_path, "rb");
-    if (!f) { return false; }
-
-    session_t session;
-    if (fread(&session, sizeof(session), 1, f) != 1) {
-        fclose(f);
-        return false;
-    }
-    fclose(f);
-
-    return true;
+    return false;
 }
 
 /**
@@ -51,47 +95,5 @@ bool is_session_valid(void) {
  *  true if saving succeeded, false otherwise
  */
 bool save_session(const char *email, const char *password) {
-    // Get machine key
-    char machine_key[MACHINE_KEY_LENGTH];
-    if (!get_machine_key(machine_key, sizeof(machine_key))) { return false; }
-
-    // Encrypt password using machine key
-    char encrypted_password[ENCRYPTED_DATA_BUFFER_SIZE];
-    if (!encrypt_data(password, machine_key, encrypted_password,
-                sizeof(encrypted_password))) {
-        return false;
-    }
-
-    session_t session = {0};
-
-    strncpy(session.email, email, MAX_EMAIL_ADDRESS_LENGTH -1);
-    session.email[MAX_EMAIL_ADDRESS_LENGTH - 1] = '\0';
-
-    strncpy(session.encrypted_password, encrypted_password, 
-            ENCRYPTED_DATA_BUFFER_SIZE - 1);
-    session.encrypted_password[ENCRYPTED_DATA_BUFFER_SIZE - 1] = '\0';
-
-    // Set timestamps
-    session.last_activity = time(NULL);
-    session.session_timeout_seconds = DEFAULT_SESSION_TIMEOUT;
-
-    const char *home = getenv("HOME");
-    if (!home) {
-        return false;
-    }
-
-    char config_path[CONFIG_PATH_BUFFER_SIZE];
-    snprintf(config_path, sizeof(config_path), "%s/%s", home, CONFIG_FILE);
-
-    // Write session to file (binary)
-    FILE *f = fopen(config_path, "wb");
-    if (!f) { return false; }
-
-    bool success = (fwrite(&session, sizeof(session), 1, f) == 1);
-    fclose(f);
-
-    // Set restrictive permissions (user read/write only)
-    chmod(config_path, 0600);
-
-    return success;
+    return false;
 }

@@ -5,6 +5,8 @@
 #define CONFIG_PATH_BUFFER_SIZE 512     // Buffer size for config path
 
 /* Session constants */
+#define SESSION_TOKEN_LENGTH 65         // 64 chars + null terminator
+#define SESSION_FILE_PATH ".tmail/session"
 #define DEFAULT_SESSION_TIMEOUT 86400   // 24 hours in seconds
 
 /* Cryptography constants */
@@ -20,7 +22,7 @@
 typedef enum {
     PARSE_CONTINUE = -1,    // Continue normal execution
     PARSE_EXIT_SUCCESS = 0, // Exit with success
-    PARSE_EXIT_ERROR        // Exit with error
+    PARSE_EXIT_ERROR = 1    // Exit with error
 } parse_result_t;
 
 #endif // CONSTANTS_H
