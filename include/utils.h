@@ -13,6 +13,7 @@ int parse_global_flags(int argc, const char **argv);
 bool parse_args(int argc, const char **argv);
 
 /* Console messages */
+void print_with_prefix(const char *fmt, ...);
 void print_help(void);
 void print_version(void);
 

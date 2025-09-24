@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <unistd.h>
 #include <sys/utsname.h>
 #include <openssl/sha.h>
@@ -193,6 +194,25 @@ bool decrypt_data(const char *data, const char *key, char *output,
 }
 
 /* Console messages */
+
+/**
+ * Print a given string to console with the "tmail: " prefix
+ *
+ * Parameters:
+ *  fmt - The string format specifiers
+ *  ... - The arguments corresponding to the format specifiers
+ *
+ * Return:
+ *  None
+ */
+void print_with_prefix(const char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+
+    fputs("tmail: ", stdout);
+    vprintf(fmt, args);
+    fflush(stdout);
+}
 
 /**
  * Print a help message to stdout, containing a list of commands and
