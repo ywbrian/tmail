@@ -22,7 +22,7 @@
  *  1 if program should exit with failure after parsing flag
  *  -1 if no global flags provided or program should continue
  */
-int parse_global_flags(int argc, const char **argv) {
+int parse_global_flags(int argc, char **argv) {
 	if (argc == 2) {
 		if (strcmp(argv[1], "--help") == 0) {
 			print_help();
@@ -35,25 +35,30 @@ int parse_global_flags(int argc, const char **argv) {
 	return -1;
 }
 
-bool execute_cmd(const char *cmd_name, int argc, const char **argv) {
-	for (int i = 0; i < n_commands; i++) {
+bool execute_cmd(int argc, char **argv) {
+    const char *cmd_name = argv[0];
+	for (int i = 0; i < num_commands; i++) {
 		if (strcmp(cmd_name, commands[i].name) == 0) {
-			return commands[i].func(argc - 2,
-			                        (const char **)(argv + 2));
+			return commands[i].func(argc, argv);
 		}
 	}
 	fprintf(stderr, "Unknown command: %s\n", cmd_name);
 	return false;
 }
 
-bool cmd_login(int argc, const char **argv) {
-    UNUSED(argc);
+bool cmd_login(int argc, char **argv) {
     UNUSED(argv);
+
+    if (argc > 1) { 
+        print_with_prefix(stderr, "too many arguments\n");
+        return false;
+    }
 
 	char email[MAX_EMAIL_ADDRESS_LENGTH]; // +1 for null terminator
 	printf("Enter email address: ");
 	if (fgets(email, sizeof(email), stdin) == NULL) {
 		fprintf(stderr, "Invalid email address");
+        return false;
 	}
 
 	// Remove trailing newline if present
@@ -63,24 +68,13 @@ bool cmd_login(int argc, const char **argv) {
 		return false;
 	}
 
-	char *pw = getpass("Password: ");
-	if (!pw) {
-		fprintf(stderr, "Failed to read password");
-		return false;
-	}
-
-	size_t plen = strlen(pw);
-	if (plen) {
-		memset(pw, 0, plen);
-	}
-
 	return true;
 }
 
 /* Command table */
 const command_t commands[] = {{"login", cmd_login}};
 
-const int n_commands = sizeof(commands) / sizeof(command_t);
+const int num_commands = sizeof(commands) / sizeof(command_t);
 
 /**
  * Helper function to verify syntax of a given email address
@@ -92,12 +86,12 @@ const int n_commands = sizeof(commands) / sizeof(command_t);
  */
 bool validate_email(const char *email) {
 	if (!email || email[0] == '\0') {
-		fprintf(stderr, "Email address cannot be empty\n");
+		fprintf(stderr, "email address cannot be empty\n");
 		return false;
 	}
 
 	if (strlen(email) > MAX_EMAIL_ADDRESS_LENGTH) {
-		fprintf(stderr, "Email address exceeds maximum length (%d)\n",
+		fprintf(stderr, "email address exceeds maximum length (%d)\n",
 		        MAX_EMAIL_ADDRESS_LENGTH);
 		return false;
 	}
@@ -110,7 +104,7 @@ bool validate_email(const char *email) {
 
 	reti = regcomp(&regex, pattern, REG_EXTENDED | REG_NOSUB);
 	if (reti) {
-		fprintf(stderr, "Error: failed to compile regex\n");
+		fprintf(stderr, "fatal: failed to compile regex\n");
 		return false;
 	}
 
@@ -118,7 +112,7 @@ bool validate_email(const char *email) {
 	regfree(&regex);
 
 	if (reti != 0) {
-		fprintf(stderr, "Invalid email address format\n");
+		fprintf(stderr, "invalid email address format\n");
 		return false;
 	}
 

@@ -1,19 +1,19 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <stdio.h>
 #include <stdbool.h>
-#include <stddef.h>
 
 #define UNUSED(x) (void)(x)
 
 #define xstr(s) str(s)
 #define str(s) #s
 
-int parse_global_flags(int argc, const char **argv);
-bool parse_args(int argc, const char **argv);
+int parse_global_flags(int argc, char **argv);
+bool parse_args(int argc, char **argv);
 
 /* Console messages */
-void print_with_prefix(const char *fmt, ...);
+void print_with_prefix(FILE *stream, const char *fmt, ...);
 void print_help(void);
 void print_version(void);
 

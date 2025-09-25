@@ -12,16 +12,13 @@
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 
-bool parse_args(int argc, const char **argv) {
-	if (argc < 2 || !isalpha(argv[1][0])) {
+bool parse_args(int argc, char **argv) {
+	if (argc < 2) { // No subcommand given
 		fprintf(stderr, "Usage: tmail <command> [options]\n");
 		return false;
 	}
 
-	const char *cmd = argv[1];
-	execute_cmd(cmd, argc - 2, (const char **)(argv + 2));
-
-	return false;
+	return execute_cmd(argc - 1, argv + 1);
 }
 
 /* Cryptography tools */
@@ -36,7 +33,6 @@ bool parse_args(int argc, const char **argv) {
  * Return:
  *  true if the key was successfully generated, false otherwise
  */
- 
 bool get_machine_key(char *key_output, size_t key_size) {
     if (key_size < MACHINE_KEY_LENGTH) { // 64-char has + null terminator
         return false;
@@ -196,22 +192,25 @@ bool decrypt_data(const char *data, const char *key, char *output,
 /* Console messages */
 
 /**
- * Print a given string to console with the "tmail: " prefix
+ * Print a given string to a stream with the "tmail: " prefix
  *
  * Parameters:
- *  fmt - The string format specifiers
- *  ... - The arguments corresponding to the format specifiers
+ *  stream - The output stream
+ *  fmt    - The string format specifiers
+ *  ...    - The arguments corresponding to the format specifiers
  *
  * Return:
  *  None
  */
-void print_with_prefix(const char *fmt, ...) {
+void print_with_prefix(FILE *stream, const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
 
-    fputs("tmail: ", stdout);
-    vprintf(fmt, args);
-    fflush(stdout);
+    fputs("tmail: ", stream);
+    vfprintf(stream, fmt, args);
+    fflush(stream);
+
+    va_end(args);
 }
 
 /**
@@ -232,10 +231,10 @@ void print_help(void) {
  * Print the current application version to stdout
  *
  * Parameters:
- *  none
+ *  None
  *
  * Return:
- *  void
+ *  None
  */
 void print_version(void) {
 	printf("tmail version %s\n", xstr(VERSION));
