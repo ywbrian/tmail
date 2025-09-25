@@ -1,5 +1,5 @@
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef TMAIL_COMMANDS_H
+#define TMAIL_COMMANDS_H
 
 #include <stdbool.h>
 
@@ -21,4 +21,4 @@ bool validate_email(const char *email);
 extern const command_t commands[];
 extern const int num_commands;
 
-#endif // COMMANDS_H
+#endif // TMAIL_COMMANDS_H

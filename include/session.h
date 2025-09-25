@@ -1,5 +1,5 @@
-#ifndef SESSION_H
-#define SESSION_H
+#ifndef TMAIL_SESSION_H
+#define TMAIL_SESSION_H
 
 #include "constants.h"
 

@@ -1,6 +1,6 @@
-#ifndef VERSION_H
-#define VERSION_H
+#ifndef TMAIL_VERSION_H
+#define TMAIL_VERSION_H
 
-#define VERSION 0.0.1
+#define TMAIL_VERSION 0.0.1
 
-#endif // VERSION_H
+#endif // TMAIL_VERSION_H

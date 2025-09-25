@@ -1,5 +1,5 @@
-#ifndef EMAIL_H
-#define EMAIL_H
+#ifndef TMAIL_EMAIL_H
+#define TMAIL_EMAIL_H
 
 #include <stdbool.h>
 
