@@ -3,9 +3,8 @@
 
 #include <stdbool.h>
 
-/* Typedefs */
-// command function pointer type declaration
-typedef bool (*cmd_func_t)(int, char **);
+/* Custom types */
+typedef int (*cmd_func_t)(int, char **); // Command function pointer
 
 // Command structure
 typedef struct {
@@ -14,9 +13,8 @@ typedef struct {
 } command_t;
 
 /* Function declarations */
-int parse_global_flags(int argc, char **argv);
-bool execute_cmd(int argc, char **argv);
-bool cmd_login(int argc, char **argv);
+int dispatch_command(int argc, char **argv);
+int cmd_login(int argc, char **argv);
 bool validate_email(const char *email);
 
 /* Command table declaration */

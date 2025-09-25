@@ -8,15 +8,13 @@
 #include <openssl/rand.h>
 #include <pwd.h>
 #include <stdbool.h>
+#include <errno.h>
 
 /* Session constants */
 #define SESSION_FILE_PATH ".tmail/session"  // File path to store session info
-#define SESSION_TOKEN_BYTE_SIZE 32          // Size of session token in bytes
-#define SESSION_TOKEN_LENGTH 64             // Length of hex-encoded token
-#define SESSION_TIMEOUT_SECONDS 3600        // 1 hour
 #define DEFAULT_FILE_PERMISSIONS 0600       // mkdir for .tmail
 
-
+// Buffer to store session file path during runtime
 static char session_file_path[MAX_PATH_LENGTH];
 
 /**
@@ -26,16 +24,17 @@ static char session_file_path[MAX_PATH_LENGTH];
  *  None
  *
  * Return:
- *  None
+ *  -1 if already retrieved
+ *  1  if retrieval failed
+ *  0  if retrieval succeeded
  */
-static void get_session_file_path(void) {
-    // Return if path already retrieved
-    if (session_file_path[0] != '\0') { return; }
+static int get_session_file_path(void) {
+    if (session_file_path[0] != '\0') { return -1; }
 
     const char *home = getenv("HOME");
     if (!home) {
         struct passwd *pw = getpwuid(getuid());
-        if (!pw) { exit(1); }
+        if (!pw) { return 1; }
         home = pw->pw_dir;
     }
 
@@ -45,48 +44,24 @@ static void get_session_file_path(void) {
     // Ensure directory exists
     char dir_path[MAX_PATH_LENGTH];
     snprintf(dir_path, sizeof(dir_path), "%s/.tmail", home);
-    mkdir(dir_path, DEFAULT_FILE_PERMISSIONS); // Ignore error if already exists
-}
 
-/**
- * Generate random token as hex string
- *
- * Parameters:
- *  token_str - The string buffer to store the token
- *  len - The size of the token buffer
- *
- * Return:
- *  true if the token was successfully generated, false otherwise
- */
-bool generate_session_token(char *token_str, size_t len) {
-    if (len < SESSION_TOKEN_BUFFER_SIZE) { return false; }
-
-    unsigned char buf[SESSION_TOKEN_BYTE_SIZE];
-    if (RAND_bytes(buf, sizeof(buf)) != 1) { return false; }
-
-    size_t offset = 0;
-    for (int i = 0; i < SESSION_TOKEN_BYTE_SIZE; i++) {
-        int written = 
-            snprintf(token_str + offset, len - offset, "%02x", buf[i]);
-
-        // Encoding failed or buffer too small
-        if (written < 0 || written >= (int)(len - offset)) { return false; }
-
-        offset += written;
+    // Ignore errors where directory already exists
+    if(mkdir(dir_path, DEFAULT_FILE_PERMISSIONS) != 0 && errno != EEXIST) {
+        perror("mkdir");
+        return 1;
     }
-    token_str[64] = '\0'; // Append null terminator
-    return true;
-}
 
+    return 0;
+}
 
 /**
  * Check if there is currently a valid session
  *
  * Parameters:
- *  none
+ *  None
  *
  * Returns:
- *  true if the session is valid, false otherwise
+ *  True if the session is valid, false otherwise
  */
 bool is_session_valid(void) {
     return false;
@@ -100,8 +75,8 @@ bool is_session_valid(void) {
  *  password: the password to be encrypted and saved
  *
  * Return:
- *  true if saving succeeded, false otherwise
+ *  True if saving succeeded, false otherwise
  */
-bool save_session(const char *email, const char *password) {
+bool save_session(session_t *session) {
     return false;
 }

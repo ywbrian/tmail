@@ -5,12 +5,6 @@
 #define CONFIG_PATH_BUFFER_SIZE 512     // Buffer size for config path
 #define MAX_PATH_LENGTH 512             // Maximum length of path string
 
-/* Cryptography constants */
-#define MACHINE_KEY_LENGTH 65   // 64 hex chars + null terminator
-#define AES_KEY_SIZE 32         // 256-bit AES key
-#define AES_IV_SIZE 16          // AES block size for IV
-#define AES_IV_HEX_LENGTH 32    // IV in hex (16 * 2)
-
 #define PLAINTEXT_DATA_BUFFER_SIZE 128 // Max plaintext data length
 #define ENCRYPTED_DATA_BUFFER_SIZE 512 // Max encrypted data length
 

@@ -10,32 +10,7 @@
 #include <string.h>
 #include <unistd.h>
 
-/**
- * Parse and handle any global flags in command line arguments
- *
- * Parameters:
- *  argc - the argument count
- *  argv - the argument strings
- *
- * Return:
- *  0 if program should exit with success after parsing flag
- *  1 if program should exit with failure after parsing flag
- *  -1 if no global flags provided or program should continue
- */
-int parse_global_flags(int argc, char **argv) {
-	if (argc == 2) {
-		if (strcmp(argv[1], "--help") == 0) {
-			print_help();
-		} else if (strcmp(argv[1], "--version") == 0) {
-			print_version();
-		}
-		return 0;
-	}
-
-	return -1;
-}
-
-bool execute_cmd(int argc, char **argv) {
+int dispatch_command(int argc, char **argv) {
     const char *cmd_name = argv[0];
 	for (int i = 0; i < num_commands; i++) {
 		if (strcmp(cmd_name, commands[i].name) == 0) {
@@ -43,32 +18,32 @@ bool execute_cmd(int argc, char **argv) {
 		}
 	}
 	fprintf(stderr, "Unknown command: %s\n", cmd_name);
-	return false;
+	return 1;
 }
 
-bool cmd_login(int argc, char **argv) {
+int cmd_login(int argc, char **argv) {
     UNUSED(argv);
 
     if (argc > 1) { 
         print_with_prefix(stderr, "too many arguments\n");
-        return false;
+        return 1;
     }
 
 	char email[MAX_EMAIL_ADDRESS_LENGTH]; // +1 for null terminator
 	printf("Enter email address: ");
 	if (fgets(email, sizeof(email), stdin) == NULL) {
 		fprintf(stderr, "Invalid email address");
-        return false;
+        return 1;
 	}
 
 	// Remove trailing newline if present
 	email[strcspn(email, "\n")] = '\0';
 
 	if (!validate_email(email)) {
-		return false;
+		return 1;
 	}
 
-	return true;
+	return 0;
 }
 
 /* Command table */
