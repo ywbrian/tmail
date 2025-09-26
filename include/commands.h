@@ -4,18 +4,17 @@
 #include <stdbool.h>
 
 /* Custom types */
-typedef int (*cmd_func_t)(int, char **); // Command function pointer
+typedef int (*command_func_t)(int, char **); // Command function pointer
 
 // Command structure
 typedef struct {
 	const char *name;
-	cmd_func_t func;
+	command_func_t func;
 } command_t;
 
 /* Function declarations */
 int dispatch_command(int argc, char **argv);
-int cmd_login(int argc, char **argv);
-bool validate_email(const char *email);
+int command_login(int argc, char **argv);
 
 /* Command table declaration */
 extern const command_t commands[];

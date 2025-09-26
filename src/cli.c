@@ -52,7 +52,17 @@ int dispatch_args(int argc, char **argv) {
  *  void
  */
 void show_help(void) {
-	printf("login   Login to an email account\n");
+    printf("Usage:\n");
+    printf("    tmail <command> [options]\n\n");
+    printf("Commands:\n");
+	printf("    login   Login to an email account\n");
+	printf("    send    Send an email\n");
+	printf("    inbox   View inbox\n");
+	printf("    logout  Logout of current session\n");
+    printf("\n");
+    printf("Global options:\n");
+	printf("    --help      Show this help message\n");
+	printf("    --version   Show program version\n");
 }
 
 /**
@@ -65,5 +75,5 @@ void show_help(void) {
  *  None
  */
 void show_version(void) {
-	printf("tmail version %s\n", xstr(VERSION));
+	printf("tmail version %s\n", xstr(TMAIL_VERSION));
 }

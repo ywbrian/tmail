@@ -1,7 +1,8 @@
 #include "security.h"
+#include "constants.h"
 
 #include <string.h>
-
+#include <termios.h>
 #include <unistd.h>
 #include <sys/utsname.h>
 #include <openssl/sha.h>
@@ -9,7 +10,6 @@
 #include <openssl/rand.h>
 
 /* Cryptography constants */
-#define MACHINE_KEY_LENGTH 65   // 64 hex chars + null terminator
 #define AES_KEY_SIZE 32         // 256-bit AES key
 #define AES_IV_SIZE 16          // AES block size for IV
 #define AES_IV_HEX_LENGTH 32    // IV in hex (16 * 2)
@@ -63,7 +63,7 @@ int get_machine_key(char *key_output, size_t key_size) {
     }
     key_output[64] = '\0';
 
-    return 1;
+    return 0;
 }
 
 int encrypt_data(const char* data, const char* key, char *output,

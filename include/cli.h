@@ -2,8 +2,8 @@
 #define TMAIL_CLI_H
 
 /* Command-line argument parsing */
-int parse_global_flags(int argc, char **argv);
-int parse_args(int argc, char **argv);
+int handle_global_flags(int argc, char **argv);
+int dispatch_args(int argc, char **argv);
 
 /* Console messages */
 void show_help(void);
